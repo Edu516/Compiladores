@@ -21,7 +21,7 @@ public class Main {
         AnalisadorSintatico analisador = new AnalisadorSintatico(automatoIf);
 
         // Testa algumas entradas
-        String entrada1 = "iif"; // Inválido
+        String entrada1 = "iif where if , + --"; // Inválido
         String entrada2 = "where if ";  // Válido
         String entrada3 = "iff"; // Inválido
 
