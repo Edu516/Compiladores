@@ -17,10 +17,6 @@ public class automato {
         addTabelaTransicao();
     }
 
-    public void adicionarEstado(estado e) {
-        estados.add(e);
-    }
-
     public void setEstadoInicial(estado e) {
         estadoInicial = e;
     }
@@ -34,55 +30,72 @@ public class automato {
     }
 
     private void addTabelaTransicao() {
-        // Crie estados
+        String[] caracteresIgnorados = {""};
+        
         estado est = new estado(0, false);
         est.addTransicao(1, "i");
-        addEstado(est);
-        setEstadoInicial(est);
-        
-        est = new estado(1, false);
-        est.addTransicao(2, "f");
-        addEstado(est);
-        
-        est = new estado(2, true);
-        String[] caracteresIgnorados = {""};
+        caracteresIgnorados = new String[]{"i"};
         alfabeto(caracteresIgnorados, est);
         addEstado(est);
-        
-        // Adicione estados ao autômato
-        adicionarEstado(est);
+        setEstadoInicial(est);
+
+        est = new estado(1, false);
+        est.addTransicao(2, "f");
+        caracteresIgnorados = new String[]{"f"};
+        alfabeto(caracteresIgnorados, est);
+        addEstado(est);
+
+        est = new estado(2, true);
+        caracteresIgnorados = new String[]{""};
+        alfabeto(caracteresIgnorados, est);
+        addEstado(est);
+
+        est = new estado(3, true);
+        caracteresIgnorados = new String[]{""};
+        alfabeto(caracteresIgnorados, est);
+        addEstado(est);
 
         est = new estado(0, false);
         est.addTransicao(1, "i");
-
     }
 
-    public void alfabeto(String[] ignora, estado est) {
+    public void alfabeto(String[] ignorados, estado est) {
         String[] alfa = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
         for (int i = 0; i < alfa.length; i++) {
-            if (!alfa.equals(ignora)) {
-                est.addTransicao(0, alfa[i]);
+            if (!contem(ignorados, alfa[i])) {
+                est.addTransicao(3, alfa[i]);
             }
         }
     }
 
-    public void numeros(String[] ignora, estado est) {
+    public void numeros(String[] ignorados, estado est) {
         String[] alfa = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         for (int i = 0; i < alfa.length; i++) {
-            if (!alfa.equals(ignora)) {
+            if (!contem(ignorados, alfa[i])) {
                 est.addTransicao(0, alfa[i]);
             }
         }
     }
 
-    public void addEstado(estado est ) {
+    private boolean contem(String[] array, String elemento) {
+        for (String str : array) {
+            if (str.equals(elemento)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addEstado(estado est) {
         estados.add(est);
     }
-    
-    public String getTipoToken(int cod){
+
+    public String getTipoToken(int cod) {
         switch (cod) {
             case 2:
                 return "Palavra Reservada";
+            case 3:
+                return "ID";
             default:
                 return "Não aceita";
         }

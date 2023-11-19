@@ -25,7 +25,7 @@ public class Main {
         String entrada2 = "where if ";  // Válido
         String entrada3 = "iff"; // Inválido
 
-        analisador.validarEntrada(entrada2);
+        analisador.validarEntrada(entrada1);
         System.out.println(analisador.getTokens().toString());
     }
 

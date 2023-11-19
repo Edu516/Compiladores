@@ -21,36 +21,37 @@ public class AnalisadorSintatico {
         estado estadoAtual = automato.getEstadoInicial();
         int posInicial = 0;
         int posFinal = 0;
-        String lexema = "";
-        for (int i = 0; i < entrada.length(); i++) {
-            if (Character.isWhitespace(entrada.charAt(i)) || i == entrada.length()) {
-                // Encontrou um espaço em branco, processa o lexema formado até agora
-                if (!lexema.isEmpty()) {
-                    posFinal = i;
-                    processarLexema(lexema, posInicial, posFinal);
-                    lexema = ""; // Reinicia o lexema para o próximo
-                    posInicial = 0;
-                }
-                posFinal = 0;
+        int pos = 0;
+
+        for (char c : entrada.toCharArray()) {
+            pos++;
+
+            estado proximoEstado = obterProximoEstado(estadoAtual, Character.toString(c));
+
+            if (proximoEstado != null) {
+                // Caractere válido para o estado atual
+                estadoAtual = proximoEstado;
+                posFinal = pos;
             } else {
-                if (posInicial == 0) {
-                    posInicial = i;
+                // Caractere não válido para o estado atual, processa o token formado até agora
+                if (estadoAtual.getFim()) {
+                    criarTokenEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1, automato.getTipoToken(estadoAtual.getCod()));
+                } else {
+                    criarTokenNaoEsperado(Character.toString(c), pos - 1, pos - 1); // Cria um token para o caractere não esperado
                 }
-                lexema = lexema + entrada.charAt(i);
+
+                // Reinicia para o próximo token
+                estadoAtual = automato.getEstadoInicial();
+                posInicial = pos;
+                posFinal = pos;
             }
         }
-    }
 
-    private void processarLexema(String lexema, int posInicial, int posFinal) {
-        estado estadoAtual = automato.getEstadoInicial();
-        for (char c : lexema.toCharArray()) {
-            estadoAtual = obterProximoEstado(estadoAtual, Character.toString(c));
-        }
-
-        if (estadoAtual != null) {
-            criarTokenEsperado(lexema, posInicial, posFinal,automato.getTipoToken(estadoAtual.getCod()));
-        }else{
-            criarTokenNaoEsperado(lexema, posInicial, posFinal);
+        // Processa o último token se não terminou com um caractere inválido
+        if (estadoAtual.getFim()) {
+            criarTokenEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1, automato.getTipoToken(estadoAtual.getCod()));
+        } else {
+            criarTokenNaoEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1);
         }
     }
 
@@ -58,7 +59,7 @@ public class AnalisadorSintatico {
         if (estadoAtual == null) {
             return null;
         }
-        
+
         // Obtém as transições do estado atual
         List<transicao> transicoes = estadoAtual.getTransicoes();
 
@@ -73,7 +74,7 @@ public class AnalisadorSintatico {
         // Retorna nulo se não houver correspondência
         return null;
     }
-    
+
     private void criarTokenEsperado(String lexema, int posInicial, int posFinal, String tipo) {
         token tk = new token();
         tk.setLexema(lexema);
