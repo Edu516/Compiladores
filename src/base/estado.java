@@ -7,12 +7,12 @@ import java.util.List;
  *
  * @author eduardo
  */
-public class estado {
+public class Estado {
     private int cod;
     private boolean fim;
     private List<transicao> transicoes;
 
-    public estado(int cod, boolean fim) {
+    public Estado(int cod, boolean fim) {
         this.cod = cod;
         this.fim = fim;
         this.transicoes = new ArrayList<>();

@@ -60,7 +60,7 @@ public class token {
 
     @Override
     public String toString() {
-        return "token{" + "cod=" + cod + ", lexema=" + lexema + ", tipo=" + tipo + ", posInicial=" + posInicial + ", posFinal=" + posFinal + '}'+"\n";
+        return "token{" + "cod = " + cod + ", lexema = " + lexema + ", tipo = " + tipo + ", posInicial = " + posInicial + ", posFinal = " + posFinal + '}'+"\n";
     }
     
 }

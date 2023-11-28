@@ -1,7 +1,7 @@
 package analisadores;
 
-import base.automato;
-import base.estado;
+import base.Automato;
+import base.Estado;
 import base.token;
 import base.transicao;
 import java.util.ArrayList;
@@ -9,16 +9,16 @@ import java.util.List;
 
 public class AnalisadorSintatico {
 
-    private automato automato;
+    private Automato automato;
     private List<token> tokens;
 
-    public AnalisadorSintatico(automato automato) {
+    public AnalisadorSintatico(Automato automato) {
         tokens = new ArrayList<>();
         this.automato = automato;
     }
 
     public void validarEntrada(String entrada) {
-        estado estadoAtual = automato.getEstadoInicial();
+        Estado estadoAtual = automato.getEstadoInicial();
         int posInicial = 0;
         int posFinal = 0;
         int pos = 0;
@@ -26,36 +26,44 @@ public class AnalisadorSintatico {
         for (char c : entrada.toCharArray()) {
             pos++;
 
-            estado proximoEstado = obterProximoEstado(estadoAtual, Character.toString(c));
+            Estado proximoEstado = obterProximoEstado(estadoAtual, Character.toString(c));
 
             if (proximoEstado != null) {
                 // Caractere válido para o estado atual
                 estadoAtual = proximoEstado;
                 posFinal = pos;
             } else {
-                // Caractere não válido para o estado atual, processa o token formado até agora
-                if (estadoAtual.getFim()) {
-                    criarTokenEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1, automato.getTipoToken(estadoAtual.getCod()));
-                } else {
-                    criarTokenNaoEsperado(Character.toString(c), pos - 1, pos - 1); // Cria um token para o caractere não esperado
-                }
+                // Processa o token formado até agora
+                processarToken(estadoAtual, entrada, posInicial, posFinal - 1);
 
                 // Reinicia para o próximo token
                 estadoAtual = automato.getEstadoInicial();
                 posInicial = pos;
                 posFinal = pos;
+
+                // Verifica novamente o caractere atual após reiniciar
+                proximoEstado = obterProximoEstado(estadoAtual, Character.toString(c));
+
+                if (proximoEstado != null) {
+                    estadoAtual = proximoEstado;
+                    posFinal = pos;
+                }
             }
         }
 
         // Processa o último token se não terminou com um caractere inválido
+        processarToken(estadoAtual, entrada, posInicial, posFinal - 1);
+    }
+
+    private void processarToken(Estado estadoAtual, String entrada, int posInicial, int posFinal) {
         if (estadoAtual.getFim()) {
-            criarTokenEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1, automato.getTipoToken(estadoAtual.getCod()));
+            criarTokenEsperado(entrada.substring(posInicial, posFinal + 1), posInicial, posFinal, automato.getTipoToken(estadoAtual.getCod()));
         } else {
-            criarTokenNaoEsperado(entrada.substring(posInicial, posFinal), posInicial, posFinal - 1);
+            criarTokenNaoEsperado(entrada.substring(posInicial, posFinal + 1), posInicial, posFinal);
         }
     }
 
-    private estado obterProximoEstado(estado estadoAtual, String entrada) {
+    private Estado obterProximoEstado(Estado estadoAtual, String entrada) {
         if (estadoAtual == null) {
             return null;
         }
@@ -65,9 +73,13 @@ public class AnalisadorSintatico {
 
         // Procura a transição que corresponde à entrada
         for (transicao transicao : transicoes) {
-            if (transicao.getCaracter().equals(entrada)) {
+            if (transicao.getCaracter().equalsIgnoreCase(entrada)) {
                 // Retorna o próximo estado se houver uma correspondência
-                return automato.getEstados().get(transicao.getCod());
+                int codigoProximoEstado = transicao.getCod();
+                return automato.getEstados().stream()
+                        .filter(e -> e.getCod() == codigoProximoEstado)
+                        .findFirst()
+                        .orElse(null);
             }
         }
 
